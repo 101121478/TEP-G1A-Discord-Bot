@@ -20,11 +20,15 @@ with open("badwords.txt") as file:
 # to see if there are any words in the message that are blacklisted
 @bot.event
 async def on_message(message):
+    result = False;
     for bad_word in bad_words:
         if bad_word in message.content.lower():
-            await message.channel.send("{}, your message has been censored.".format(message.author.mention))
-            await message.delete()
-
+            result = True
+    if result:
+        await message.delete()
+        await message.channel.send("{}, your message has been censored.".format(message.author.mention))
+    
+    await bot.process_commands(message)
 
 @bot.event
 async def on_ready():
