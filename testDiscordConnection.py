@@ -1,16 +1,33 @@
+
 # bot.py
 import os
 
 import discord
 from dotenv import load_dotenv
+from discord.ext import commands
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 client = discord.Client()
+bot = commands.Bot(command_prefix='!')
 
-@client.event
+@bot.event
 async def on_ready():
-    print(f'{client.user} has connected to Discord!')
+    print(f'{bot.user} has connected to Discord!')
 
-client.run(TOKEN)
+@bot.command(pass_context = True)
+async def ban(ctx, user: discord.User):
+   await ctx.guild.ban(user)
+   await ctx.channel.send("{} has been banned from the server".format(user))
+    
+
+@bot.command(pass_context = True)
+async def kick(ctx, user: discord.User):
+    await ctx.guild.kick(user)
+    await ctx.channel.send("{} has been kicked from the server".format(user))
+
+
+
+
+bot.run(TOKEN)
