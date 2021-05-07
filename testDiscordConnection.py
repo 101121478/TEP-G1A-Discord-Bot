@@ -18,9 +18,27 @@ async def on_ready():
 
 @bot.command(pass_context = True)
 async def ban(ctx, user: discord.User):
-   await ctx.guild.ban(user)
-   await ctx.channel.send("{} has been banned from the server".format(user))
-    
+    guild = ctx.guild
+    mbed = discord.Embed(
+        title = 'Success!',
+        description = f"{user} has successfully banned." 
+    )
+    if ctx.author.guild_permission.ban_members:
+        await ctx.send(embed=mbed)
+        await guild.ban(user=user)
+
+@bot.command()
+async def unban(ctx, user: discord.User):
+    guild = ctx.guild
+    mbed = discord.Embed(
+        title = 'Success!',
+        description = f"{user} has successfully unbanned." 
+    )
+    if ctx.author.guild_permission.ban_members:
+        await ctx.send(embed=mbed)
+        await guild.ban(user=user)
+
+
 
 @bot.command(pass_context = True)
 async def kick(ctx, user: discord.User):
