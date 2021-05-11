@@ -1,6 +1,7 @@
 # bot.py
 import os
 import mysql.connector
+import matplotlib.pyplot as plt
 
 import discord
 from discord.ext import commands
@@ -26,10 +27,12 @@ mydb = mysql.connector.connect(
 )
 mycursor = mydb.cursor()
 
+# Creates a topics database table
 def create_topics_table():
     mycursor.execute("CREATE TABLE topics (topic VARCHAR(30), count INT DEFAULT 0)")
     mydb.commit()
 
+# Checks if the topics table exists in database
 def does_topics_exists():
     mycursor.execute("SHOW TABLES LIKE 'topics'")
     result = mycursor.fetchone()
@@ -38,6 +41,7 @@ def does_topics_exists():
     else:
         return False
 
+# Check if topics table exists in database. If not then call create_topics_table() to create the table.
 if not does_topics_exists():
     print("Table does not exist")
     create_topics_table()
@@ -59,9 +63,22 @@ async def filter_messages(message):
     
     await bot.process_commands(message)
 
+# Plots a bar graph of the topics/concepts and their counts
+# bar graph is sent to the discord channel as an image where it can be viewed and/or saved.
+async def plot_graph(ctx, topics, counts):
+    plt.clf()
+    plt.bar(topics, counts)
+    plt.xlabel('Topic/Concept')
+    plt.ylabel('Count')
+    plt.title('Number of times Topics/Concepts have been discussed')
+    plt.savefig(fname='common_topics')
+    await ctx.channel.send(file=discord.File('common_topics.png'))
+    os.remove('common_topics.png')
+
+
 # Retreives all topics from the topics table and checks if any of them
 # are in the message, if so then update the count for that topic by 1
-def check_for_common_topic(message):
+def check_message_for_topic(message):
     mycursor.execute("SELECT * FROM topics")
     result = mycursor.fetchall()
     count = 0
@@ -75,27 +92,38 @@ def check_for_common_topic(message):
     mydb.commit()
 
 
-
+# Whenever a message is sent call filter_messages to check the messages and censor any inappropriate ones.
+# Also call check_message_for_topic() to check the message and identify if any topics from the topics table are mentioned if so then count it.
 @bot.event
 async def on_message(message):
     await filter_messages(message)
-    check_for_common_topic(message)
+    check_message_for_topic(message)
 
 
 # Will retrieve the concepts/topics and the number of times they have been mentioned in the server
 @bot.command()
-async def get_common_topics(ctx):
+async def display_topics(ctx):
     topics = []
+    counts = []
+    mostCommonTopic = ""
+    commonTopicCount = 0
+
 
     mycursor.execute("SELECT * FROM topics")
     result = mycursor.fetchall()
 
     if result:
-        for topic in result:
-            topics.append(str(topic))
-        
-        message = '\n'.join(topics)
-        await ctx.channel.send(message)
+        for result in result:       # for each tuple in result store the topic and its count in seperate arrays
+            topics.append(result[0])
+            counts.append(result[1])
+
+            if result[1] > commonTopicCount:    # Find the most mentioned topic. Checks if next topic has a higher count then current highest count.
+                commonTopicCount = result[1]
+                mostCommonTopic = result[0]
+
+        await ctx.channel.send("Currently the most commonly discussed topic/concept is {}. It has been mentioned {} times.".format(mostCommonTopic, commonTopicCount))
+        await plot_graph(ctx, topics, counts)
+
     else:
         await ctx.channel.send("No topics in the table to display. Add a topic using the command !add_topic topic")
 
