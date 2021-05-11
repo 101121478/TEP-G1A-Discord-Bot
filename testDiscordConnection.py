@@ -46,23 +46,6 @@ if not does_topics_exists():
     print("Table does not exist")
     create_topics_table()
 
-# Open badwords.txt file and read each line into an array
-with open("badwords.txt") as file:
-    bad_words = file.read().split()
-
-# When a message is sent then bot will check it against the bad_words array 
-# to see if there are any words in the message that are blacklisted
-async def filter_messages(message):
-    result = False;
-    for bad_word in bad_words:
-        if bad_word in message.content.lower():
-            result = True
-    if result:
-        await message.delete()
-        await message.channel.send("{}, your message has been censored.".format(message.author.mention))
-    
-    await bot.process_commands(message)
-
 # Plots a bar graph of the topics/concepts and their counts
 # bar graph is sent to the discord channel as an image where it can be viewed and/or saved.
 async def plot_graph(ctx, topics, counts):
