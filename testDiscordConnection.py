@@ -1,22 +1,29 @@
 # bot.py
 import os
+import discord
 import mysql.connector
 import matplotlib.pyplot as plt
 
-import discord
+from better_profanity import profanity
 from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
+client = discord.Client()
+bot = commands.Bot(command_prefix='!')
+
+
+# Open badwords.txt file and read each line into an array
+with open("censoredWords.txt") as file:
+    censored_words = file.read().split()
+
+# Get SQL database details
 dbHost = os.getenv('dbHost')
 dbUser = os.getenv('dbUser')
 dbPassword = os.getenv('dbPassword')
 db = os.getenv('database')
-
-client = discord.Client()
-bot = commands.Bot(command_prefix='!')
 
 # Initialise connection to SQL database with details from .env file
 mydb = mysql.connector.connect(
@@ -73,12 +80,25 @@ def check_message_for_topic(message):
             mycursor.execute(sql)
     
     mydb.commit()
+    
+# When a message is sent then bot will check it against the bad_words array 
+# to see if there are any words in the message that are blacklisted
+async def filter_message(message):
+  profanity.add_censor_words(censored_words)
 
+  result = False;
+    if profanity.contains_profanity(message.content.lower()):
+        result = True
+    if result:
+        await message.delete()
+        await message.channel.send("{}, your message has been deleted as it contains inappropriate text.".format(message.author.mention))
 
+        
 # Whenever a message is sent call filter_messages to check the messages and censor any inappropriate ones.
 # Also call check_message_for_topic() to check the message and identify if any topics from the topics table are mentioned if so then count it.
 @bot.event
 async def on_message(message):
+    await filter_message(message)
     check_message_for_topic(message)
     await bot.process_commands(message)
 
