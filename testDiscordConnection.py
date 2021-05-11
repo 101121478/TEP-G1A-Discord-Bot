@@ -79,9 +79,8 @@ def check_message_for_topic(message):
 # Also call check_message_for_topic() to check the message and identify if any topics from the topics table are mentioned if so then count it.
 @bot.event
 async def on_message(message):
-    await filter_messages(message)
     check_message_for_topic(message)
-
+    await bot.process_commands(message)
 
 # Will retrieve the concepts/topics and the number of times they have been mentioned in the server
 @bot.command()
