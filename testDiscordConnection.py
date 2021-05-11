@@ -84,9 +84,9 @@ def check_message_for_topic(message):
 # When a message is sent then bot will check it against the bad_words array 
 # to see if there are any words in the message that are blacklisted
 async def filter_message(message):
-  profanity.add_censor_words(censored_words)
-
-  result = False;
+    profanity.add_censor_words(censored_words)
+    
+    result = False
     if profanity.contains_profanity(message.content.lower()):
         result = True
     if result:
