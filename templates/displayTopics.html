@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="refresh" content="2">
+	<title>DisBot Common Topics/Concepts - Web Interface</title>
+	<link href="styles/style.css" rel="stylesheet"/>
+	<style>
+		table, th, td {
+			border: 1px solid black
+		}
+	</style>
+</head>
+<body>
+	<h1>DisBot Common Topics/Concepts - Web Interface</h1>
+	<button onclick="location.href = '/'" id="backButton">Back</button>
+	<table>
+		<tr>
+			<th>Topic/Concept</th>
+			<th>Count</th>
+		</tr>
+		{% for topic in topics %}
+		<tr>
+			<td>{{ topic[0] }}</td>
+			<td>{{ topic[1] }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+</body>
+</html>
+
+
