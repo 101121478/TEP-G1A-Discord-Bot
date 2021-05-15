@@ -3,18 +3,16 @@ import os
 import discord
 import mysql.connector
 import matplotlib.pyplot as plt
-import readTopicsToHTML
 
 from better_profanity import profanity
 from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
+TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 
 client = discord.Client()
 bot = commands.Bot(command_prefix='!')
-readTopicsToHTML.app
 
 
 # Open badwords.txt file and read each line into an array
