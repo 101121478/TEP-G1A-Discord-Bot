@@ -3,18 +3,21 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
-	<title>IoT Programming Assigment - Web Interface</title>
+	<title>DisBot Web Interface - Index Page</title>
 	<link href="styles/style.css" rel="stylesheet"/>
 </head>
 <body>
 	<h1>DisBot - Web Interface</h1>
-	<button id="displayButton">Display Topics</button><br/>
+	<p id='welcome'>Welcome {{ user.name }}</p>
+	<p></p><button id="displayTopics">View Topics/Concepts</button></p>
 
-<script type="text/javascript">
-	document.getElementById("displayButton").onclick = function() {
-		location.href = "displayTopics.html";
-	};
-</script>
+	<a href="/logout/">Logout</a>
+
+	<script type="text/javascript">
+		document.getElementById("displayTopics").onclick = function() {
+			location.href = "/displayTopics.html";
+		};
+	</script>
 
 </body>
 </html>
