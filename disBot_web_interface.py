@@ -16,9 +16,9 @@ app = Flask(__name__)
 app.secret_key = b"%\xe0'\x01\xdeH\x8e\x85m|\xb3\xffCN\xc9g"
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "true"  
 
-app.config["DISCORD_CLIENT_ID"] = 843032598011445248
-app.config["DISCORD_CLIENT_SECRET"] = "E827wO8tzzxIjqAldZhTCaxlmxdOKLJ_"
-app.config["DISCORD_BOT_TOKEN"] = "ODExNTAwNTYyMDQ1ODYxOTE5.YCzGyg.p5Ca2fLh-e5WWcJyMxTqr0VA2HM"
+app.config["DISCORD_CLIENT_ID"] = os.getenv("CLIENT_ID")
+app.config["DISCORD_CLIENT_SECRET"] = os.getenv('CLIENT_SECRET')
+app.config["DISCORD_BOT_TOKEN"] = os.getenv('DISCORD_BOT_TOKEN')
 app.config["DISCORD_REDIRECT_URI"] = "http://127.0.0.1:8080/callback"
 
 discord = DiscordOAuth2Session(app)
@@ -45,17 +45,17 @@ def index():
 
     
         
-    return render_template("index.html", **templateData, welcome='Welcome ' + user.name)
+    return render_template("index.html", **templateData)
 
 #Catches any 'Unathorized' errors that are thrown. Redirects to index.html.
 @app.errorhandler(Unauthorized)
 def redirect_unauthorized(e):
-    return redirect(url_for("index"))
+    return render_template('login.html', errorText="Error: User not authorized.")
 
 #Catches any 'AccessDenied' errors that are thrown. Redirects to index.html.
 @app.errorhandler(AccessDenied)
 def redirect_unauthorized(e):
-    return redirect(url_for("index"))
+    return render_template('login.html', errorText="Error: Access Denied")
 
 # Login page which creates the discord session for the user login.
 @app.route("/login/")
