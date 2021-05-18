@@ -9,13 +9,23 @@
 <body>
 	<h1>DisBot - Web Interface</h1>
 	<p id='welcome'>Welcome {{ user.name }}</p>
-	<p></p><button id="displayTopics">View Topics/Concepts</button></p>
+	<p><button id="displayTopics">View Topics/Concepts</button></p>
+	<p><button id="addTopic">Add a Topic/Concept</button></p>
+	<p><button id="deleteTopic">Delete a Topic/Concept</button></p>
 
 	<a href="/logout/">Logout</a>
 
 	<script type="text/javascript">
 		document.getElementById("displayTopics").onclick = function() {
-			location.href = "/displayTopics.html";
+			location.href = "/displayTopics/";
+		};
+
+		document.getElementById("addTopic").onclick = function() {
+			location.href = "/addTopic/";
+		};
+
+		document.getElementById("deleteTopic").onclick = function() {
+			location.href = "/deleteTopic/";
 		};
 	</script>
 
