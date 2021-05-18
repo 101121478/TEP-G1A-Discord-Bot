@@ -42,25 +42,26 @@ def index():
     templateData = {
             'user' : user
         }
-
-    
-        
     return render_template("index.html", **templateData)
+
 
 #Catches any 'Unathorized' errors that are thrown. Redirects to index.html.
 @app.errorhandler(Unauthorized)
 def redirect_unauthorized(e):
     return render_template('login.html', errorText="Error: User not authorized.")
 
+
 #Catches any 'AccessDenied' errors that are thrown. Redirects to index.html.
 @app.errorhandler(AccessDenied)
 def redirect_unauthorized(e):
     return render_template('login.html', errorText="Error: Access Denied")
 
+
 # Login page which creates the discord session for the user login.
 @app.route("/login/")
 def login():
     return discord.create_session()
+
 
 # Executes when the user logs in discord's OAuth returns back to the web interface
 @app.route("/callback/")
@@ -69,10 +70,13 @@ def callback():
     redirect_to = data.get("redirect", "/")
     
     return redirect(redirect_to)
+
+
 # Executes when user clicks add topic/concept button on index page. Displays simple text input form to enter topic/concept.
 @app.route("/addTopic/")
 def displayAddTopicForm():
     return render_template('addTopic.html')
+
 
 # Executes when the user submits the form on addTopic page. Submits to itself via POST and topic/concept is added to topics table.
 @app.route("/addTopic/", methods=['POST'])
@@ -111,10 +115,13 @@ def recieveAddTopicForm():
             return render_template('addTopic.html', output=output)
 
 
+# Executes when user clicks delete topic/concept button on index page. Displays simple text input form to enter topic/concept.
 @app.route("/deleteTopic/")
 def displayDeleteTopicForm():
     return render_template('deleteTopic.html')
 
+
+# Executes when the user submits the form on deleteTopic page. Submits to itself via POST and topic/concept is deleted from topics table.
 @app.route("/deleteTopic/", methods=['POST'])
 def recieveDeleteTopicForm():
     topic = request.form['topic']
@@ -171,6 +178,7 @@ def displayTopics():
         'topics' : result
         }
     return render_template('displayTopics.html', **templateData)
+
 
 # Executes when the user presses the logout button in index.html
 @app.route("/logout/")
