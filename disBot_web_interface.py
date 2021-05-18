@@ -1,7 +1,7 @@
 import os
 import mysql.connector
 
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, request
 from flask_discord import DiscordOAuth2Session, Unauthorized, AccessDenied, requires_authorization
 
 
@@ -69,9 +69,89 @@ def callback():
     redirect_to = data.get("redirect", "/")
     
     return redirect(redirect_to)
+# Executes when user clicks add topic/concept button on index page. Displays simple text input form to enter topic/concept.
+@app.route("/addTopic/")
+def displayAddTopicForm():
+    return render_template('addTopic.html')
+
+# Executes when the user submits the form on addTopic page. Submits to itself via POST and topic/concept is added to topics table.
+@app.route("/addTopic/", methods=['POST'])
+def recieveAddTopicForm():
+    topic = request.form['topic']
+
+    if topic == "":
+        return render_template('deleteTopic.html', output="No topic entered!")
+    else:
+        # Initialise connection to SQL database with details from .env file
+        mydb = mysql.connector.connect(
+            host=dbHost,
+            user=dbUser,
+            password=dbPassword,
+            database=db
+        )
+        mycursor = mydb.cursor()
+
+        topic = topic.lower()
+        sql = "SELECT * FROM topics WHERE topic = '{}'".format(topic)
+
+        mycursor.execute(sql)
+        result = mycursor.fetchall()
+
+        if result:
+            output="Topic/Concept: '{}' already exists in topics table in database: {}.".format(topic, db)
+            return render_template('addTopic.html', output=output)
+        else:
+            sql = "INSERT INTO topics (topic, count) VALUES (%s, %s)"
+            val = (topic, 0)
+            
+            mycursor.execute(sql, val)
+            mydb.commit()
+
+            output="Added topic/concept: '{}' to the topics table in database: {}.".format(topic, db)
+            return render_template('addTopic.html', output=output)
+
+
+@app.route("/deleteTopic/")
+def displayDeleteTopicForm():
+    return render_template('deleteTopic.html')
+
+@app.route("/deleteTopic/", methods=['POST'])
+def recieveDeleteTopicForm():
+    topic = request.form['topic']
+
+    if topic == "":
+        return render_template('deleteTopic.html', output="No topic entered!")
+    else:
+        # Initialise connection to SQL database with details from .env file
+        mydb = mysql.connector.connect(
+            host=dbHost,
+            user=dbUser,
+            password=dbPassword,
+            database=db
+        )
+        mycursor = mydb.cursor()
+
+        topic = topic.lower()
+        sql = "SELECT * FROM topics WHERE topic = '{}'".format(topic)
+
+        mycursor.execute(sql)
+        result = mycursor.fetchall()
+
+        if not result:
+            output="No topic/concept: '{}' in topics table in database: {}.".format(topic, db)
+            return render_template('deleteTopic.html', output=output)
+        else:
+            sql = "DELETE FROM topics WHERE topic = '{}'".format(topic)
+
+            mycursor.execute(sql)
+            mydb.commit()
+
+            output="Topic/Concept: '{}' has been deleted from topics table in database: {}.".format(topic, db)
+            return render_template('deleteTopic.html', output=output)
+
 
 #HTML page for displaying the topics SQL table 
-@app.route('/displayTopics.html')
+@app.route('/displayTopics/')
 def displayTopics():
 
     # Initialise connection to SQL database with details from .env file
