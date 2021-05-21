@@ -208,12 +208,14 @@ async def delete_topic(ctx, topic):
         mydb.close()
         
 @bot.command(pass_context = True)
+@has_permissions(ban_members=True)
 async def ban(ctx, user: discord.User):
    await ctx.guild.ban(user)
    await ctx.channel.send("{} has been banned from the server".format(user))
     
 
 @bot.command(pass_context = True)
+@has_permissions(kick_members=True)
 async def kick(ctx, user: discord.User):
     await ctx.guild.kick(user)
     await ctx.channel.send("{} has been kicked from the server".format(user))
