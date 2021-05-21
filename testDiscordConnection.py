@@ -1,3 +1,4 @@
+
 # bot.py
 import os
 import discord
@@ -8,13 +9,13 @@ import matplotlib.pyplot as plt
 from better_profanity import profanity
 from discord.ext import commands
 from dotenv import load_dotenv
+from discord.ext import commands
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 
 client = discord.Client()
 bot = commands.Bot(command_prefix='!')
-
 
 # Open badwords.txt file and read each line into an array
 with open("censoredWords.txt") as file:
@@ -205,9 +206,21 @@ async def delete_topic(ctx, topic):
             await ctx.channel.send("Topic: {} has been deleted from 'topics' table in database: {}.".format(topic, db))
 
         mydb.close()
+        
+@bot.command(pass_context = True)
+async def ban(ctx, user: discord.User):
+   await ctx.guild.ban(user)
+   await ctx.channel.send("{} has been banned from the server".format(user))
+    
+
+@bot.command(pass_context = True)
+async def kick(ctx, user: discord.User):
+    await ctx.guild.kick(user)
+    await ctx.channel.send("{} has been kicked from the server".format(user))
 
 @bot.event
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
+
 
 bot.run(TOKEN)
