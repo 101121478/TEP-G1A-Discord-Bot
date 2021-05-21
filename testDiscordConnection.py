@@ -3,15 +3,18 @@
 import os
 import discord
 from discord.ext.commands.core import has_permissions
+from discord.ext.commands.errors import CommandNotFound
 import mysql.connector
 import matplotlib.pyplot as plt
 
 from better_profanity import profanity
-from discord.ext import commands
 from dotenv import load_dotenv
 from discord.ext import commands
+from discord.ext import commands
+from numpy import isposinf
 
 load_dotenv()
+
 TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 
 client = discord.Client()
@@ -41,8 +44,17 @@ def databaseConnection():
 def create_topics_table():
     mydb = databaseConnection()
 
-    mydb.cursor.execute("CREATE TABLE topics (topic VARCHAR(30), count INT DEFAULT 0)")
+    mydb.cursor().execute("CREATE TABLE topics (topic VARCHAR(30), count INT DEFAULT 0)")
     mydb.commit()
+    mydb.close()
+
+# Creates a strikes database table
+def create_strikes_table():
+    mydb = databaseConnection()
+
+    mydb.cursor().execute("CREATE TABLE strikes (user VARCHAR(30), count INT DEFAULT 0)")
+    mydb.commit()
+    mydb.close()
 
 # Checks if the topics table exists in database
 def does_topics_exists():
@@ -55,10 +67,25 @@ def does_topics_exists():
     else:
         return False
 
-# Check if topics table exists in database. If not then call create_topics_table() to create the table.
+# Checks if the strikes table exists in database
+def does_strikes_exists():
+    mydb = databaseConnection()
+    mycursor = mydb.cursor()
+    mycursor.execute("SHOW TABLES LIKE 'strikes'")
+    result = mycursor.fetchone()
+    if result:
+        return True
+    else:
+        return False
+
+# Check if topics and strikes table exist in database. If not create them.
 if not does_topics_exists():
     print("Table does not exist")
     create_topics_table()
+if not does_strikes_exists():
+    print("Table does not exist")
+    create_strikes_table()
+
 
 def in_adminChannel(channel_id):
     channel = bot.get_channel(845131902424055819)
@@ -112,16 +139,7 @@ async def filter_message(message):
     if result:
         await message.delete()
         await message.channel.send("{}, your message has been deleted as it contains inappropriate text.".format(message.author.mention))
-
-        
-# Whenever a message is sent call filter_messages to check the messages and censor any inappropriate ones.
-# Also call check_message_for_topic() to check the message and identify if any topics from the topics table are mentioned if so then count it.
-@bot.event
-async def on_message(message):
-    await filter_message(message)
-    check_message_for_topic(message)
-    await bot.process_commands(message)
-
+   
 # Will retrieve the concepts/topics and the number of times they have been mentioned in the server
 @bot.command()
 #@has_permissions(administrator=True)
@@ -219,6 +237,23 @@ async def ban(ctx, user: discord.User):
 async def kick(ctx, user: discord.User):
     await ctx.guild.kick(user)
     await ctx.channel.send("{} has been kicked from the server".format(user))
+
+# Whenever a message is sent call filter_messages to check the messages and censor any inappropriate ones.
+# Also call check_message_for_topic() to check the message and identify if any topics from the topics table are mentioned if so then count it.
+@bot.event
+async def on_message(message):
+    await filter_message(message)
+    check_message_for_topic(message)
+
+    await bot.process_commands(message)
+
+# If the user enters a command that does not exist or enters a command wrong then the bot 
+# will send a message to inform the user that the command isn't recognised.
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, CommandNotFound):
+        return await ctx.channel.send(error)
+    raise error
 
 @bot.event
 async def on_ready():
