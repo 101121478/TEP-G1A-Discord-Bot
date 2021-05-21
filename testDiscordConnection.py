@@ -86,7 +86,8 @@ if not does_strikes_exists():
     print("Table does not exist")
     create_strikes_table()
 
-
+# Simple check if the current channe is the admin-room channel
+# Used by topic/concept commands and message filtering to determine if function should run
 def in_adminChannel(channel_id):
     channel = bot.get_channel(845131902424055819)
 
@@ -128,18 +129,41 @@ def check_message_for_topic(message):
         mydb.commit()
         mydb.close()
     
-# When a message is sent then bot will check it against the bad_words array 
+# When a message is sent the bot will check it against the bad_words array 
 # to see if there are any words in the message that are blacklisted
+# If so then delete the message and add a strike to the strikes database table for the user
 async def filter_message(message):
+    mydb = databaseConnection()
+    mycursor = mydb.cursor()
     profanity.add_censor_words(censored_words)
     
-    result = False
+    containsProfanity = False
     if profanity.contains_profanity(message.content.lower()):
-        result = True
-    if result:
+        containsProfanity = True
+
+    if containsProfanity:
+        mycursor.execute("SELECT * FROM strikes WHERE user='{}'".format(message.author.name))
+        result = mycursor.fetchall()
+        count = 1
+
+        if result:
+            print('User: {} is in strikes table'.format(message.author.name))
+            for row in result:
+                count = row[1] + 1
+                sql = "UPDATE strikes SET count = {} WHERE user = '{}'".format(count, row[0])
+                mycursor.execute(sql)
+        else:
+            print("User:  {} not in strikes table".format(message.author.name))
+            sql = "INSERT INTO strikes (user, count) VALUES (%s, %s)"
+            val = (message.author.name, count)
+            mycursor.execute(sql, val)
+        
+        mydb.commit()
+        mydb.close()
+
         await message.delete()
-        await message.channel.send("{}, your message has been deleted as it contains inappropriate text.".format(message.author.mention))
-   
+        await message.channel.send("{}, your message has been deleted as it contains inappropriate text. And you have received a strike. Total Strikes: {}".format(message.author.mention, count))
+
 # Will retrieve the concepts/topics and the number of times they have been mentioned in the server
 @bot.command()
 #@has_permissions(administrator=True)
