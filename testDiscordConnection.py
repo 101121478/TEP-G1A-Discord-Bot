@@ -44,7 +44,6 @@ def databaseConnection():
 # Creates a topics database table
 def create_topics_table():
     mydb = databaseConnection()
-
     mydb.cursor().execute("CREATE TABLE topics (topic VARCHAR(30), count INT DEFAULT 0)")
     mydb.commit()
     mydb.close()
@@ -52,7 +51,6 @@ def create_topics_table():
 # Creates a strikes database table
 def create_strikes_table():
     mydb = databaseConnection()
-
     mydb.cursor().execute("CREATE TABLE strikes (user VARCHAR(30), count INT DEFAULT 0)")
     mydb.commit()
     mydb.close()
@@ -81,10 +79,10 @@ def does_strikes_exists():
 
 # Check if topics and strikes table exist in database. If not create them.
 if not does_topics_exists():
-    print("Table does not exist")
+    print("Topics table does not exist")
     create_topics_table()
 if not does_strikes_exists():
-    print("Table does not exist")
+    print("Strikes table does not exist")
     create_strikes_table()
 
 # Simple check if the current channe is the admin-room channel
@@ -96,20 +94,6 @@ def in_adminChannel(channel_id):
         return True
     else:
         return False
-
-# Plots a bar graph of the x and y values enetered
-# also takes in an xlabel, ylabel, title and filename
-# bar graph is sent to the discord channel as an image where it can be viewed and/or saved.
-async def plot_graph(ctx, x, y, xlabel, ylabel, title, filename):
-    plt.clf()
-    plt.bar(x, y)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.yticks(np.arange(min(y), max(y)+1, 1))
-    plt.title(title)
-    plt.savefig(fname=filename)
-    await ctx.channel.send(file=discord.File('{}.png'.format(filename)))
-    os.remove('{}.png'.format(filename))
 
 
 # Retreives all topics from the topics table and checks if any of them
@@ -166,6 +150,22 @@ async def filter_message(message):
 
         await message.delete()
         await message.channel.send("{}, your message has been deleted as it contains inappropriate text. And you have received a strike. Total Strikes: {}".format(message.author.mention, count))
+
+
+# Plots a bar graph of the x and y values enetered
+# also takes in an xlabel, ylabel, title and filename
+# bar graph is sent to the discord channel as an image where it can be viewed and/or saved.
+async def plot_graph(ctx, x, y, xlabel, ylabel, title, filename):
+    plt.clf()
+    plt.bar(x, y)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.yticks(np.arange(min(y), max(y)+1, 1))
+    plt.title(title)
+    plt.savefig(fname=filename)
+    await ctx.channel.send(file=discord.File('{}.png'.format(filename)))
+    os.remove('{}.png'.format(filename))
+
 
 
 # Will retrieve the concepts/topics and the number of times they have been mentioned in the server
