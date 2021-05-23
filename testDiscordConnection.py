@@ -6,6 +6,7 @@ from discord.ext.commands.core import has_permissions
 from discord.ext.commands.errors import CommandNotFound
 import mysql.connector
 import matplotlib.pyplot as plt
+import numpy as np
 
 from better_profanity import profanity
 from dotenv import load_dotenv
@@ -96,17 +97,19 @@ def in_adminChannel(channel_id):
     else:
         return False
 
-# Plots a bar graph of the topics/concepts and their counts
+# Plots a bar graph of the x and y values enetered
+# also takes in an xlabel, ylabel, title and filename
 # bar graph is sent to the discord channel as an image where it can be viewed and/or saved.
-async def plot_graph(ctx, topics, counts):
+async def plot_graph(ctx, x, y, xlabel, ylabel, title, filename):
     plt.clf()
-    plt.bar(topics, counts)
-    plt.xlabel('Topic/Concept')
-    plt.ylabel('Count')
-    plt.title('Number of times Topics/Concepts have been discussed')
-    plt.savefig(fname='common_topics')
-    await ctx.channel.send(file=discord.File('common_topics.png'))
-    os.remove('common_topics.png')
+    plt.bar(x, y)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.yticks(np.arange(min(y), max(y)+1, 1))
+    plt.title(title)
+    plt.savefig(fname=filename)
+    await ctx.channel.send(file=discord.File('{}.png'.format(filename)))
+    os.remove('{}.png'.format(filename))
 
 
 # Retreives all topics from the topics table and checks if any of them
@@ -164,6 +167,34 @@ async def filter_message(message):
         await message.delete()
         await message.channel.send("{}, your message has been deleted as it contains inappropriate text. And you have received a strike. Total Strikes: {}".format(message.author.mention, count))
 
+
+# Will retrieve the concepts/topics and the number of times they have been mentioned in the server
+@bot.command()
+#@has_permissions(administrator=True)
+async def display_strikes(ctx):
+    if in_adminChannel(ctx.channel.id):
+        users = []
+        strikes = []
+        mydb = databaseConnection()
+        mycursor = mydb.cursor()
+
+
+        mycursor.execute("SELECT * FROM strikes")
+        result = mycursor.fetchall()
+
+        if result:
+            for result in result:       # for each tuple in result store the topic and its count in seperate arrays
+                users.append(result[0])
+                strikes.append(result[1])
+
+            await plot_graph(ctx, users, strikes, 'Member', 'Strikes', 'Members and the number of strikes they have', 'common_topics')
+
+        else:
+            await ctx.channel.send("No members in the table to display.")
+
+        mydb.close()
+
+
 # Will retrieve the concepts/topics and the number of times they have been mentioned in the server
 @bot.command()
 #@has_permissions(administrator=True)
@@ -191,7 +222,7 @@ async def display_topics(ctx):
                     mostCommonTopic = result[0]
 
             await ctx.channel.send("Currently the most commonly discussed topic/concept is {}. It has been mentioned {} times.".format(mostCommonTopic, commonTopicCount))
-            await plot_graph(ctx, topics, counts)
+            await plot_graph(ctx, topics, counts, 'Topic/Concept', 'Count', 'Number of times Topics/Concepts have been discussed', 'common_topics')
 
         else:
             await ctx.channel.send("No topics in the table to display. Add a topic using the command !add_topic topic")
