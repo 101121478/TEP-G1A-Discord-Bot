@@ -283,13 +283,45 @@ async def delete_topic(ctx, topic):
 @bot.command(pass_context = True)
 @has_permissions(ban_members=True)
 async def ban(ctx, user: discord.User):
-   await ctx.guild.ban(user)
-   await ctx.channel.send("{} has been banned from the server".format(user))
+    mydb = databaseConnection()
+    mycursor = mydb.cursor()
+
+    sql = "SELECT * FROM strikes WHERE user = '{}'".format(user.name)
+
+    mycursor.execute(sql)
+    result = mycursor.fetchall()
+
+    if result:      # If user exists in strikes table then remove them from the table when they are banned
+        sql = "DELETE FROM strikes WHERE user = '{}'".format(user.name)
+
+        mycursor.execute(sql)
+        mydb.commit()
+    
+    mydb.close()
+
+    await ctx.guild.ban(user)
+    await ctx.channel.send("{} has been banned from the server".format(user))
     
 
 @bot.command(pass_context = True)
 @has_permissions(kick_members=True)
 async def kick(ctx, user: discord.User):
+    mydb = databaseConnection()
+    mycursor = mydb.cursor()
+
+    sql = "SELECT * FROM strikes WHERE user = '{}'".format(user.name)
+
+    mycursor.execute(sql)
+    result = mycursor.fetchall()
+
+    if result:      # If user exists in strikes table then remove them from the table when they are kicked
+        sql = "DELETE FROM strikes WHERE user = '{}'".format(user.name)
+
+        mycursor.execute(sql)
+        mydb.commit()
+    
+    mydb.close()
+
     await ctx.guild.kick(user)
     await ctx.channel.send("{} has been kicked from the server".format(user))
 
