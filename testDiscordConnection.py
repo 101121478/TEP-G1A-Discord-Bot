@@ -169,7 +169,7 @@ async def plot_graph(ctx, x, y, xlabel, ylabel, title, filename):
 
 
 # Will retrieve the concepts/topics and the number of times they have been mentioned in the server
-@bot.command(liases=['display_strikes', 'show_strikes'])
+@bot.command(liases=['show_strikes'])
 #@has_permissions(administrator=True)
 async def display_strikes(ctx):
     if in_adminChannel(ctx.channel.id):
@@ -196,7 +196,7 @@ async def display_strikes(ctx):
 
 
 # Will retrieve the concepts/topics and the number of times they have been mentioned in the server
-@bot.command(aliases=['display_topics', 'show_topics'])
+@bot.command(aliases=['show_topics'])
 #@has_permissions(administrator=True)
 async def display_topics(ctx):
     if in_adminChannel(ctx.channel.id):
@@ -256,7 +256,7 @@ async def add_topic(ctx, topic):
         mydb.close()
 
 # Deletes the topic entered by the user from the database
-@bot.command(aliases=['delete_topic', 'remove_topic'])
+@bot.command(aliases=['remove_topic'])
 async def delete_topic(ctx, topic):
     if in_adminChannel(ctx.channel.id):
         mydb = databaseConnection()
