@@ -198,7 +198,7 @@ async def plot_graph(ctx, x, y, xlabel, ylabel, title, filename):
 @bot.command()
 async def reminder(ctx, date, hour, minute, *args):
     desc = ' '.join(args)
-    t = datetime.strptime(date + hour + minute, '%D%H%M')
+    t = datetime.strptime(date + hour + minute, '%d %H:&M')
     print(t)
     addScheduleByDateHourMinute(desc, date, hour, minute, ctx.message.author)
     await ctx.channel.send("{}, '{}' reminder added!".format(ctx.message.author.mention, desc))
