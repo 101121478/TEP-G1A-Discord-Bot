@@ -1,6 +1,8 @@
 # TEP-G1A-Discord-Bot
 
 COMMANDS
+- **!display_strikes**
+    - Displays a graph of the strikes table.
 - **!display_topics**
     - Displays a graph the topics in the topics table, their counts and also tells the user what the most common topic is.
 - **!add_topic 'topic'**
