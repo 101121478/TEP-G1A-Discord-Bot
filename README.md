@@ -4,7 +4,7 @@ COMMANDS
 - **!display_strikes**
     - Displays a graph of the strikes table.
 - **!display_topics**
-    - Displays a graph the topics in the topics table, their counts and also tells the user what the most common topic is.
+    - Displays a graph of the topics in the topics table, their counts and also tells the user what the most common topic is.
 - **!add_topic 'topic'**
     - Adds the input topic to the topics table e.g. !add_topic python adds python to the table with a count of 0.
     - Will also check if topic is already in the table before attempting to add.
