@@ -5,6 +5,7 @@ import discord
 import mysql.connector
 import matplotlib.pyplot as plt
 import numpy as np
+import datetime
 
 from better_profanity import profanity
 from dotenv import load_dotenv
@@ -19,8 +20,8 @@ from apscheduler.triggers.cron import CronTrigger
 load_dotenv()
 
 TOKEN = os.getenv('DISCORD_BOT_TOKEN')
-welcome_channel_id = os.getenv('welcome_channel_id')
-guild_id = os.getenv('guild_id')
+welcome_channel_id = int(os.getenv('welcome_channel_id'))
+guild_id = int(os.getenv('guild_id'))
 
 #AsyncScheduler
 scheduler = AsyncIOScheduler()
