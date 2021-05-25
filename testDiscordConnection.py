@@ -19,9 +19,8 @@ from apscheduler.triggers.cron import CronTrigger
 load_dotenv()
 
 TOKEN = os.getenv('DISCORD_BOT_TOKEN')
-testing_channel_id = 837522915410968609
-welcome_channel_id = 819751860398456874
-guild_id = 819751859945996300
+welcome_channel_id = os.getenv('welcome_channel_id')
+guild_id = os.getenv('guild_id')
 
 #AsyncScheduler
 scheduler = AsyncIOScheduler()
