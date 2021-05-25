@@ -112,7 +112,7 @@ def in_adminChannel(channel_id):
 
 #part of the assingment_reminder command
 def addScheduleByDateHourMinute(desc, timezone, user):
-    scheduler.add_job(send_reminder, CronTrigger(start_date=timezone, end_date=timezone, timezone="Australia/Sydney"), args=(desc, user))
+    scheduler.add_job(send_reminder, CronTrigger(start_date=timezone, end_date=timezone), args=(desc, user))
 
 
 
