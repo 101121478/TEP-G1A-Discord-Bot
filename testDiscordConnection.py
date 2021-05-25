@@ -9,7 +9,7 @@ from discord.ext import commands
 bot = commands.Bot(command_prefix='!', intents=discord.Intents().all())
 
 load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
+TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 testing_channel_id = 837522915410968609
 welcome_channel_id = 819751860398456874
 guild_id = 819751859945996300
@@ -33,8 +33,8 @@ def in_channel(channel_id):
 
 
 #part of the assingment_reminder command
-def addScheduleByDateHourMinute(desc, date, hour, minute):
-    scheduler.add_job(send_reminder, CronTrigger(hour= hour, day= date, minute= minute), [desc])
+def addScheduleByDateHourMinute(desc, date, hour, minute, user):
+    scheduler.add_job(send_reminder, CronTrigger(hour= hour, day= date, minute= minute), args=(desc, user))
 
 
 
@@ -44,20 +44,13 @@ def addScheduleByDateHourMinute(desc, date, hour, minute):
 
 
 #Sending the reminder
-async def send_reminder(reminderDesc):
+async def send_reminder(reminderDesc, user):
     await bot.wait_until_ready()
-    reminder_channel = bot.get_channel(837522915410968609)
-    await reminder_channel.send(reminderDesc)
 
-async def func():
-    await bot.wait_until_ready()
-    reminder_channel = bot.get_channel(testing_channel_id)
-    await reminder_channel.send("Assignment Reminder")
+    await user.send("Hi " + f"{user.name}." + " This is your reminder for '{}'".format(reminderDesc))
 
-
-
-
-
+    #reminder_channel = bot.get_channel(837522915410968609)
+    #await reminder_channel.send("{}, This is your reminder for {}".format(user.mention, reminderDesc))
 
 
 
@@ -66,10 +59,10 @@ async def func():
 
 #Reminder function
 @bot.command()
-async def reminder(ctx, desc, date, hour, minute):
-    addScheduleByDateHourMinute(desc, date, hour, minute)
-    reminder_channel = bot.get_channel(837522915410968609)
-    await reminder_channel.send(desc + " reminder added")
+async def reminder(ctx, date, hour, minute, *args):
+    desc = ' '.join(args)
+    addScheduleByDateHourMinute(desc, date, hour, minute, ctx.message.author)
+    await ctx.channel.send("{}, '{}' reminder added!".format(ctx.message.author.mention, desc))
 
 
 
