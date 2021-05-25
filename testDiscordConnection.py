@@ -2,24 +2,35 @@
 # bot.py
 import os
 import discord
-from discord.ext.commands.core import has_permissions
-from discord.ext.commands.errors import CommandNotFound
 import mysql.connector
 import matplotlib.pyplot as plt
 import numpy as np
 
 from better_profanity import profanity
 from dotenv import load_dotenv
+from discord.ext.commands.core import has_permissions
+from discord.ext.commands.errors import CommandNotFound
 from discord.ext import commands
 from discord.ext import commands
 from numpy import isposinf
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 
 load_dotenv()
 
 TOKEN = os.getenv('DISCORD_BOT_TOKEN')
+testing_channel_id = 837522915410968609
+welcome_channel_id = 819751860398456874
+guild_id = 819751859945996300
+
+#AsyncScheduler
+scheduler = AsyncIOScheduler()
+guild = None;
+welcome_channel = None;
+reminder_channel = None;
 
 client = discord.Client()
-bot = commands.Bot(command_prefix='!')
+bot = commands.Bot(command_prefix='!', intents=discord.Intents().all())
 
 # Open badwords.txt file and read each line into an array
 with open("censoredWords.txt") as file:
@@ -96,6 +107,24 @@ def in_adminChannel(channel_id):
         return False
 
 
+def in_channel(channel_id):
+    def predicate(ctx):
+        return ctx.message.channel.id == channel_id
+    return commands.check(predicate)
+
+
+def in_channel(channel_id):
+    def predicate(ctx):
+        return ctx.message.channel.id == channel_id
+    return commands.check(predicate)
+
+
+#part of the assingment_reminder command
+def addScheduleByDateHourMinute(desc, date, hour, minute, user):
+    scheduler.add_job(send_reminder, CronTrigger(hour= hour, day= date, minute= minute), args=(desc, user))
+
+
+
 # Retreives all topics from the topics table and checks if any of them
 # are in the message, if so then update the count for that topic by 1
 def check_message_for_topic(message):
@@ -115,6 +144,16 @@ def check_message_for_topic(message):
         
         mydb.commit()
         mydb.close()
+
+
+#Sending the reminder
+async def send_reminder(reminderDesc, user):
+    await bot.wait_until_ready()
+
+    await user.send("Hi " + f"{user.name}." + " This is your reminder for '{}'".format(reminderDesc))
+
+    #reminder_channel = bot.get_channel(837522915410968609)
+    #await reminder_channel.send("{}, This is your reminder for {}".format(user.mention, reminderDesc))
     
 # When a message is sent the bot will check it against the bad_words array 
 # to see if there are any words in the message that are blacklisted
@@ -166,6 +205,13 @@ async def plot_graph(ctx, x, y, xlabel, ylabel, title, filename):
     await ctx.channel.send(file=discord.File('{}.png'.format(filename)))
     os.remove('{}.png'.format(filename))
 
+
+#Reminder function
+@bot.command()
+async def reminder(ctx, date, hour, minute, *args):
+    desc = ' '.join(args)
+    addScheduleByDateHourMinute(desc, date, hour, minute, ctx.message.author)
+    await ctx.channel.send("{}, '{}' reminder added!".format(ctx.message.author.mention, desc))
 
 
 # Will retrieve the concepts/topics and the number of times they have been mentioned in the server
@@ -342,9 +388,27 @@ async def on_command_error(ctx, error):
         return await ctx.channel.send(error)
     raise error
 
+
+#Send welcome notification to the new member
+@bot.event
+async def on_member_join(member):
+    guild = bot.get_guild(guild_id)
+    welcome_channel = guild.get_channel(welcome_channel_id)
+    await welcome_channel.send(f'Welcome to the {member.guild}, {member.mention}! :partying_face:')
+
+
+#Send notification when somebody left the server
+@bot.event
+async def on_member_remove(member):
+    guild = bot.get_guild(819751859945996300)
+    welcome_channel = guild.get_channel(819751860398456874)
+    await welcome_channel.send(f'{member.mention} has left the server')
+
+
 @bot.event
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
-
+    # Initializing scheduler
+    scheduler.start()
 
 bot.run(TOKEN)
