@@ -15,7 +15,9 @@ from discord.ext import commands
 from numpy import isposinf
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-from datetime import datetime
+from datetime import datetime, tzinfo, timezone
+
+import pytz
 
 load_dotenv()
 
@@ -108,8 +110,8 @@ def in_adminChannel(channel_id):
 
 
 #part of the assingment_reminder command
-def addScheduleByDateHourMinute(desc, date, hour, minute, user):
-    scheduler.add_job(send_reminder, CronTrigger(hour= hour, day= date, minute= minute), args=(desc, user))
+def addScheduleByDateHourMinute(desc, timezone, user):
+    scheduler.add_job(send_reminder, CronTrigger(start_date=timezone, end_date=timezone), args=(desc, user))
 
 
 
@@ -137,11 +139,7 @@ def check_message_for_topic(message):
 #Sending the reminder
 async def send_reminder(reminderDesc, user):
     await bot.wait_until_ready()
-
     await user.send("Hi " + f"{user.name}." + " This is your reminder for '{}'".format(reminderDesc))
-
-    #reminder_channel = bot.get_channel(837522915410968609)
-    #await reminder_channel.send("{}, This is your reminder for {}".format(user.mention, reminderDesc))
     
 # When a message is sent the bot will check it against the bad_words array 
 # to see if there are any words in the message that are blacklisted
@@ -195,12 +193,13 @@ async def plot_graph(ctx, x, y, xlabel, ylabel, title, filename):
 
 
 #Reminder function
+# Due to the heroku server the datetime must be converted to UTC time.
 @bot.command()
-async def reminder(ctx, date, hour, minute, *args):
+async def reminder(ctx, date, time, *args):
     desc = ' '.join(args)
-    t = datetime.strptime(date + hour + minute, '%d %H:&M')
-    print(t)
-    addScheduleByDateHourMinute(desc, date, hour, minute, ctx.message.author)
+    inputTime = datetime.strptime(date + " " + time, '%d/%m/%Y %H:%M')
+    utcTime = inputTime.astimezone(pytz.utc)                        
+    addScheduleByDateHourMinute(desc, utcTime, ctx.message.author)
     await ctx.channel.send("{}, '{}' reminder added!".format(ctx.message.author.mention, desc))
 
 
