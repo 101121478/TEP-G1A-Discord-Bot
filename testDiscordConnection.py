@@ -15,6 +15,7 @@ from discord.ext import commands
 from numpy import isposinf
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from datetime import datetime
 
 load_dotenv()
 
@@ -197,6 +198,8 @@ async def plot_graph(ctx, x, y, xlabel, ylabel, title, filename):
 @bot.command()
 async def reminder(ctx, date, hour, minute, *args):
     desc = ' '.join(args)
+    t = datetime.strptime(date + hour + minute, '%D%H%M')
+    print(t)
     addScheduleByDateHourMinute(desc, date, hour, minute, ctx.message.author)
     await ctx.channel.send("{}, '{}' reminder added!".format(ctx.message.author.mention, desc))
 
