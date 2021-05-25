@@ -5,6 +5,7 @@ import discord
 import mysql.connector
 import matplotlib.pyplot as plt
 import numpy as np
+import pytz
 
 from better_profanity import profanity
 from dotenv import load_dotenv
@@ -17,7 +18,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from datetime import datetime, tzinfo, timezone
 
-import pytz
+
 
 load_dotenv()
 
@@ -198,8 +199,9 @@ async def plot_graph(ctx, x, y, xlabel, ylabel, title, filename):
 async def reminder(ctx, date, time, *args):
     desc = ' '.join(args)
     inputTime = datetime.strptime(date + " " + time, '%d/%m/%Y %H:%M')
+    print('INPUT TIME: ' + inputTime)
     utcTime = inputTime.astimezone(pytz.utc)      
-    print(utcTime)                  
+    print('UTC TIME: ' + utcTime)                  
     addScheduleByDateHourMinute(desc, utcTime, ctx.message.author)
     await ctx.channel.send("{}, '{}' reminder added!".format(ctx.message.author.mention, desc))
 
