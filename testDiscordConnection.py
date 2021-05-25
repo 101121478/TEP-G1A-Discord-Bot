@@ -5,7 +5,6 @@ import discord
 import mysql.connector
 import matplotlib.pyplot as plt
 import numpy as np
-import datetime
 
 from better_profanity import profanity
 from dotenv import load_dotenv
