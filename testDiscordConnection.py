@@ -198,7 +198,8 @@ async def plot_graph(ctx, x, y, xlabel, ylabel, title, filename):
 async def reminder(ctx, date, time, *args):
     desc = ' '.join(args)
     inputTime = datetime.strptime(date + " " + time, '%d/%m/%Y %H:%M')
-    utcTime = inputTime.astimezone(pytz.utc)                        
+    utcTime = inputTime.astimezone(pytz.utc)      
+    print(utcTime)                  
     addScheduleByDateHourMinute(desc, utcTime, ctx.message.author)
     await ctx.channel.send("{}, '{}' reminder added!".format(ctx.message.author.mention, desc))
 
