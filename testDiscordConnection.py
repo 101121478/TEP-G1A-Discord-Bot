@@ -107,18 +107,6 @@ def in_adminChannel(channel_id):
         return False
 
 
-def in_channel(channel_id):
-    def predicate(ctx):
-        return ctx.message.channel.id == channel_id
-    return commands.check(predicate)
-
-
-def in_channel(channel_id):
-    def predicate(ctx):
-        return ctx.message.channel.id == channel_id
-    return commands.check(predicate)
-
-
 #part of the assingment_reminder command
 def addScheduleByDateHourMinute(desc, date, hour, minute, user):
     scheduler.add_job(send_reminder, CronTrigger(hour= hour, day= date, minute= minute), args=(desc, user))
